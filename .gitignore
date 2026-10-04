@@ -1,0 +1,18 @@
+# Your personal config - contains your real wallet addresses.
+# Never commit this; config.example.json is the template that stays in the repo.
+config.json
+
+# All generated output - contains your full transaction history.
+output/
+output_test_run/
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS cruft
+.DS_Store
+Thumbs.db

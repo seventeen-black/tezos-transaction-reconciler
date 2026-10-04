@@ -1,0 +1,29 @@
+{
+  "_comment": "Copy this file to config.json and fill in your own Tezos wallet addresses. Wallet addresses are public on-chain anyway, but it's your choice whether to commit config.json to a public fork.",
+
+  "wallets": [
+    "tz1YourFirstAddressHere00000000000",
+    "tz1YourSecondAddressHere0000000000"
+  ],
+
+  "output_dir": "output",
+
+  "output_format": "koinly",
+
+  "_custom_format_comment": "Only used if output_format is set to 'custom' above. Define your own CSV column order/headers here to match any tax platform's required format. 'field' must be one of: date, sent_amount, sent_currency, received_amount, received_currency, txhash, fee_amount, fee_currency, description - or 'static:SomeValue' for a fixed literal in every row. date_format is a Python strftime pattern (see README) - omit it to keep the default 'YYYY-MM-DD HH:MM:SS'.",
+  "custom_format": {
+    "date_format": "%m/%d/%Y %H:%M:%S",
+    "columns": [
+      {"header": "Date", "field": "date"},
+      {"header": "Received Quantity", "field": "received_amount"},
+      {"header": "Received Currency", "field": "received_currency"},
+      {"header": "Sent Quantity", "field": "sent_amount"},
+      {"header": "Sent Currency", "field": "sent_currency"},
+      {"header": "Fee Amount", "field": "fee_amount"},
+      {"header": "Fee Currency", "field": "fee_currency"},
+      {"header": "TxHash", "field": "txhash"},
+      {"header": "Tag", "field": "static:NFT"},
+      {"header": "Description", "field": "description"}
+    ]
+  }
+}
