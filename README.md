@@ -250,8 +250,7 @@ chunk of manual reconciliation work and you'd like to say thanks, that's
 genuinely appreciated but never expected:
 
 - **Ko-fi**: [ko-fi.com/0017_nick](https://ko-fi.com/0017_nick)
-- **Direct XTZ donation** (no auto-conversion, just send what you hold):
-  `add your donation address here`
+- **Direct XTZ donation**: taxontezos.tez // tz1ggNUohrrR5d3UN6DUJ9irS672JStZTKqz
 
 ---
 
