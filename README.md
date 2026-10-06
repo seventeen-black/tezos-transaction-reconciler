@@ -1,6 +1,9 @@
 # Tezos Tax Reconciler
 
-⚠️ Known issue with certain token symbols causing Koinly import errors — fix in progress, check back in a few days before relying on this
+DO NOT USE YET!
+⚠️ Known issue with certain token symbols causing Koinly import errors — fix in progress, check back after 15/10/26 before relying on this
+Also looking to fulfill_ask and 8bidou marketplace integration.
+
 
 Pulls on-chain activity for your Tezos wallets directly from [TzKT](https://tzkt.io)
 and produces tax-software-ready CSV files that correctly capture things that
