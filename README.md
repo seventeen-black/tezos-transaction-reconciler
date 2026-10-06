@@ -1,5 +1,7 @@
 # Tezos Tax Reconciler
 
+⚠️ Known issue with certain token symbols causing Koinly import errors — fix in progress, check back in a few days before relying on this
+
 Pulls on-chain activity for your Tezos wallets directly from [TzKT](https://tzkt.io)
 and produces tax-software-ready CSV files that correctly capture things that
 Koinly, Summ.com, and a plain TzKT export all currently miss — most notably
