@@ -1,29 +1,242 @@
 {
-  "_comment": "Copy this file to config.json and fill in your own Tezos wallet addresses. Wallet addresses are public on-chain anyway, but it's your choice whether to commit config.json to a public fork.",
-
+  "_comment": "Copy this file to config.json and put your own wallet addresses in 'wallets'. Lines starting with _comment are notes for you; the script ignores them. true = on, false = off.",
+  "_wallets_comment": "Every Tezos address you own. Money moving between these is treated as you moving your own money, not buying or selling.",
   "wallets": [
     "tz1YourFirstAddressHere00000000000",
     "tz1YourSecondAddressHere0000000000"
   ],
-
+  "_output_comment": "Where the result files go, and which format. 'koinly' works out of the box. 'custom' uses the custom_format section at the bottom.",
   "output_dir": "output",
-
   "output_format": "koinly",
-
-  "_custom_format_comment": "Only used if output_format is set to 'custom' above. Define your own CSV column order/headers here to match any tax platform's required format. 'field' must be one of: date, sent_amount, sent_currency, received_amount, received_currency, txhash, fee_amount, fee_currency, description - or 'static:SomeValue' for a fixed literal in every row. date_format is a Python strftime pattern (see README) - omit it to keep the default 'YYYY-MM-DD HH:MM:SS'.",
+  "_mode_comment": "THE BIG CHOICE. 'automatic' = the script makes sensible guesses (listed below) so you get far fewer rows to check by hand. 'hands_on' = no guesses at all: anything that isn't 100% clear goes to manual review, which can mean thousands of rows. You can mix: pick a mode, then set any single switch below to true or false to override it.",
+  "mode": "automatic",
+  "_switches_comment": "Each switch below is one guess (assumption). Delete a line to let the mode decide; keep it to force it on or off. Ask an accountant if unsure.",
+  "_treat_wrapped_tez_as_xtz_comment": "oXTZ is swapped 1:1 for XTZ, like changing a £10 note for two £5s. On = wrapping and unwrapping oXTZ isn't a trade. WTZ is NOT 1:1 - see wtz_mode.",
+  "treat_wrapped_tez_as_xtz": true,
+  "_lp_even_split_comment": "When you put two tokens into a liquidity pool you get one 'LP token' back. Pools always take equal value of each side, so on = the LP token is split half-and-half between the two. Off = these go to manual review.",
+  "lp_even_split": true,
+  "_farm_custody_comment": "Putting tokens into a farm, staking or lock contract (Crunchy Farms, Plenty gauges, Spice Farms, PLY vote escrow, Tezos Domains pool) is like putting money in a locker: it's still yours. On = going in and coming out is not a sale or purchase. Anything extra you get back is a reward.",
+  "farm_custody": true,
+  "_baker_payouts_as_staking_comment": "XTZ sent to you by bakers (delegation rewards) is labelled 'staking' income. Bakers are recognised by their name on TzKT.",
+  "baker_payouts_as_staking": true,
+  "_exchange_transfers_comment": "XTZ from or to an exchange (Binance, Coinbase, Kraken...) is you moving your own money, not income or a sale. Exchanges are recognised by their name on TzKT.",
+  "exchange_transfers": true,
+  "_rewards_as_income_comment": "Tokens you claim from a farm (harvest, claim) are labelled 'reward', and airdrop claims (e.g. Tezos Domains TED) are labelled 'airdrop'. Your tax software treats both as income.",
+  "rewards_as_income": true,
+  "_dex_net_trades_comment": "A swap on a DEX (QuipuSwap, Plenty, SpicySwap, 3Route) often hops through several tokens in one go. On = it becomes one trade: what left your wallet for what arrived. Only used when that is crystal clear.",
+  "dex_net_trades": true,
+  "_batch_escrow_split_comment": "When a buyer bought several of your NFTs in one go, on = each NFT gets its own sale row priced from its own payment. If several of your wallets sold in the same batch, each wallet is split on the NFTs it listed itself, and a wallet that listed none of them got a royalty. Off = the whole batch goes to escrow_batch_review.csv. A bundle bought with one payment for all NFTs (collect_bundle) always goes there, because each NFT's price can't be read.",
+  "batch_escrow_split": true,
+  "_close_relisted_listings_comment": "If you cancelled a listing and relisted the same NFT, on = the old listing is closed when the NFT sells, so it doesn't sit in listings_open.csv forever.",
+  "close_relisted_listings": true,
+  "_airdrop_spam_zeroing_comment": "NFTs with the symbols in airdrop_symbols that arrive for free are treated as spam worth nothing.",
+  "airdrop_spam_zeroing": true,
+  "airdrop_symbols": [
+    "OBJKTCOM"
+  ],
+  "airdrop_currency_override": "NULL",
+  "airdrop_zero_value_currency": "GBP",
+  "_equal_split_quantity_mints_comment": "If you minted several copies with one payment, on = the price is split equally between them.",
+  "equal_split_quantity_mints": true,
+  "_nft_multistep_resolution_comment": "Busy NFT hashes (FXHASH tickets, relisting with a fee, sending lots of NFTs at once) are sorted out when the answer is clear. Off = they all go to manual review.",
+  "nft_multistep_resolution": true,
+  "_dex_leftover_dust_comment": "A swap that also hands back a tiny leftover (like 0.04 ctez) becomes one trade plus a small separate receive. 'Tiny' is set in dust_limits.",
+  "dex_leftover_dust": true,
+  "dust_limits": {
+    "XTZ": 1.0,
+    "WTZ": 1.0,
+    "ctez": 1.0,
+    "tzBTC": 2e-05,
+    "BTCtz": 2e-05,
+    "USDt": 1.0,
+    "kUSD": 1.0,
+    "uUSD": 1.0,
+    "QUIPU": 10.0,
+    "PLENTY": 10.0,
+    "SPI": 10.0
+  },
+  "_address_labels_comment": "Fix the script's guesses about who an address is. 'exchange', 'baker', or 'none' (= not special). Example below; replace with real addresses or leave empty {}.",
+  "address_labels": {
+    "tz1ExampleExchangeAddress0000000000": "exchange",
+    "tz1ExampleNotABaker00000000000000000": "none"
+  },
+  "_escrow_comment": "Advanced. Offers paid in XTZ lock your money in the marketplace until accepted or cancelled; true = locking it isn't spending it. The two lists name the contract calls that place or cancel such offers.",
+  "escrow_deposits_as_non_events": true,
+  "wrapped_tez_tokens": [
+    "KT1TjnZYs5CGLbmV6yuW169P8Pnr9BiVwwjz"
+  ],
+  "offer_entrypoints": [
+    "offer",
+    "collection_offer",
+    "bid",
+    "make_offer"
+  ],
+  "retract_entrypoints": [
+    "retract_offer",
+    "retract_collection_offer",
+    "collection_offer_cancel",
+    "cancel_offer"
+  ],
+  "_cache_comment": "Saves answers from TzKT so re-runs are fast. Delete the folder to start fresh. \"\" turns it off.",
+  "cache_dir": ".tzkt_cache",
+  "_custom_format_comment": "Only used if output_format is 'custom'. Lets you match any tax site's column layout. 'field' can be: date, sent_amount, sent_currency, received_amount, received_currency, txhash, fee_amount, fee_currency, description, label - or 'static:Something' for the same text on every row.",
   "custom_format": {
     "date_format": "%m/%d/%Y %H:%M:%S",
     "columns": [
-      {"header": "Date", "field": "date"},
-      {"header": "Received Quantity", "field": "received_amount"},
-      {"header": "Received Currency", "field": "received_currency"},
-      {"header": "Sent Quantity", "field": "sent_amount"},
-      {"header": "Sent Currency", "field": "sent_currency"},
-      {"header": "Fee Amount", "field": "fee_amount"},
-      {"header": "Fee Currency", "field": "fee_currency"},
-      {"header": "TxHash", "field": "txhash"},
-      {"header": "Tag", "field": "static:NFT"},
-      {"header": "Description", "field": "description"}
+      {
+        "header": "Date",
+        "field": "date"
+      },
+      {
+        "header": "Received Quantity",
+        "field": "received_amount"
+      },
+      {
+        "header": "Received Currency",
+        "field": "received_currency"
+      },
+      {
+        "header": "Sent Quantity",
+        "field": "sent_amount"
+      },
+      {
+        "header": "Sent Currency",
+        "field": "sent_currency"
+      },
+      {
+        "header": "Fee Amount",
+        "field": "fee_amount"
+      },
+      {
+        "header": "Fee Currency",
+        "field": "fee_currency"
+      },
+      {
+        "header": "TxHash",
+        "field": "txhash"
+      },
+      {
+        "header": "Tag",
+        "field": "static:NFT"
+      },
+      {
+        "header": "Description",
+        "field": "description"
+      }
     ]
-  }
+  },
+  "own_wallet_amounts_only": true,
+  "sweep_tip_in_cost": true,
+  "name_unlabelled_lp_tokens": true,
+  "limit_order_custody": true,
+  "dex_route_tracing": true,
+  "purchase_reward_tokens": true,
+  "_limit_order_entrypoints_comment": "Order-book contract calls that post or cancel a limit order (used by limit_order_custody).",
+  "limit_order_post_entrypoints": [
+    "postLimitOrder"
+  ],
+  "limit_order_cancel_entrypoints": [
+    "cancelLimitOrder"
+  ],
+  "nft_trade_ins": true,
+  "route_burns_as_fee": true,
+  "farm_deposit_called_contract_only": true,
+  "_partial_listing_returns_comment": "You listed several copies of an NFT, some sold and you cancelled the rest. On = the unsold copies coming back are your own NFTs returning, not new free NFTs.",
+  "partial_listing_returns": true,
+  "_stake_payouts_as_reward_comment": "Some farms (Crunchy) pay out what you've earned when you add more to the farm. On = tokens the farm pays you in that deposit are labelled 'reward'.",
+  "stake_payouts_as_reward": true,
+  "_contract_refunds_as_non_events_comment": "You paid a contract (e.g. a payment service) and the same contract sent the exact same amount back later. On = both leave the tax file, because nothing was bought. Partial refunds are left alone.",
+  "contract_refunds_as_non_events": true,
+  "_refund_window_comment": "A payment that the same contract refunds in full within this many days counts as never having happened (used by contract_refunds_as_non_events).",
+  "refund_window_days": 30,
+  "_invoice_refund_window_comment": "A refund counts when its call carries the same invoice or order number as your payment (from the same contract or another one), within this many days. A full refund cancels the payment. A partial one cancels the part that came back, and the rest is one send naming the invoice.",
+  "invoice_refund_window_days": 365,
+  "_domain_renewals_as_cost_comment": "Renewing a .tez name is labelled 'cost'.",
+  "domain_renewals_as_cost": true,
+  "_domain_comment": "Tezos Domains contract(s) and the call that renews a .tez name (used by domain_renewals_as_cost).",
+  "domain_contracts": [
+    "KT1EVYBj3f1rZHNeUtq4ZvVxPTs77wuHwARU"
+  ],
+  "domain_renew_entrypoints": [
+    "renew"
+  ],
+  "_internal_burns_as_fee_comment": "When your call makes a contract store something new for you (an NFT you bought or minted, for example), the storage burn is taken from your balance even though TzKT shows the contract as the sender. On = it is added to that transaction's network fee. Off = only the fees of your own top-level calls are counted.",
+  "internal_burns_as_fee": true,
+  "_failed_tx_fees_as_cost_comment": "A failed transaction moved nothing, but you still paid its network fee. On = that fee is a 'cost' row in the tax file. Off = the fee is only listed in fee_only_transactions.csv and the transaction goes to remaining_review.csv.",
+  "failed_tx_fees_as_cost": true,
+  "_versum_withdrawals_as_own_funds_comment": "Versum's withdraw button (withdraw_outstanding_tez) gives you back your own XTZ held in the Versum contract. On = not income, kept out of the tax file. Off = a plain incoming XTZ, listed for review.",
+  "versum_withdrawals_as_own_funds": true,
+  "versum_withdraw_entrypoints": [
+    "withdraw_outstanding_tez"
+  ],
+  "_bets_as_cost_comment": "Betting or lottery games. On = what you bet is a 'cost' (a loss) and any payout from the game is income ('reward'). Off = plain sends and receives, listed for review.",
+  "bets_as_cost": true,
+  "bet_entrypoints": [
+    "makeBet",
+    "bet",
+    "play"
+  ],
+  "_bridge_deposits_as_own_transfer_comment": "Sending XTZ over a bridge to your own wallet on another chain. On = a transfer out with no label, described as 'Bridged to your Etherlink wallet 0x...' so you can match it. Off = a plain send, listed for review. bridge_contracts maps the bridge contract to the chain's name.",
+  "bridge_deposits_as_own_transfer": true,
+  "bridge_contracts": {
+    "KT1Wj8SUGmnEPFqyahHAcjcNQwe6YGhEXJb5": "Etherlink"
+  },
+  "bridge_deposit_entrypoints": [
+    "deposit"
+  ],
+  "_ctez_oven_as_non_event_comment": "A ctez oven is a safe for your XTZ that lets you borrow ctez. On = XTZ in and out of the oven and ctez minted or burnt aren't trades, so only fees count, and ctez never burnt back is flagged for review. Off = plain moves, listed for review.",
+  "ctez_oven_as_non_event": true,
+  "ctez_contracts": [
+    "KT1GWnsoFZVHGh7roXEER3qeCcgJgrXT3de2"
+  ],
+  "ctez_symbol": "ctez",
+  "ctez_oven_entrypoints": [
+    "create",
+    "deposit",
+    "withdraw",
+    "mint_or_burn"
+  ],
+  "_token_launch_refunds_comment": "Token launch: you put XTZ in, and harvest or claim later gives you the new token plus part of your XTZ back. On = a purchase, where the XTZ kept (put in minus given back) is the tokens' cost, spread over the harvests by amount, and the XTZ given back isn't income. Off = deposits are sends, harvests are rewards, listed for review.",
+  "token_launch_refunds": true,
+  "token_launch_claim_entrypoints": [
+    "harvest",
+    "claim"
+  ],
+  "_wallet_rewards_as_reward_comment": "Some wallet apps pay their users in their own loyalty token, like Temple Wallet's Temple Key (TKEY). It's like reward points from a shop: you got them for nothing, so on = each one is a 'reward' row. The token is recognised by its token contract, not by who sent it. If you bought or swapped for the token (you paid something in the same transaction) it stays a normal trade. Off = plain receives, listed for review. Leave it out to follow the mode.",
+  "wallet_rewards_as_reward": true,
+  "_wallet_reward_tokens_comment": "Loyalty token contracts and who pays them out. KT1VaEsV...9eXi is Temple Key (TKEY).",
+  "wallet_reward_tokens": {
+    "KT1VaEsVNiBoA56eToEK6n6BcPgh1tdx9eXi": "Temple Wallet (Temple Key, TKEY)"
+  },
+  "_burn_to_receive_as_trade_comment": "Burn-to-receive: you burn an NFT and the artist sends a new one. On = if a new NFT from the same collection (same token contract), or from a contract you called in the burn, arrives for free within burn_to_receive_window_hours, it's a trade (burnt NFT out, new NFT in, cost carries over). Unclear cases go to review. Off = these burns are listed for review. Leave it out to follow the mode.",
+  "burn_to_receive_as_trade": true,
+  "_burn_to_receive_window_hours_comment": "How long after a burn the new NFT may arrive. Some drops take a day or more, so 72 hours.",
+  "burn_to_receive_window_hours": 72,
+  "_burn_followup_review_days_comment": "A same-collection NFT arriving after the window but within this many days isn't guessed: the burn goes to review.",
+  "burn_followup_review_days": 7,
+  "_burns_as_worthless_disposal_comment": "Any other burn (dust, fakes, copyright NFTs) is like throwing it in the bin: on = written as a send with a worth of 0, so you get a capital loss of what you paid (Koinly's write-off option 1, not the 'lost' tag, which gives no loss). Off = listed for review. Leave it out to follow the mode.",
+  "burns_as_worthless_disposal": true,
+  "_burn_zero_value_currency_comment": "Your Koinly home currency, needed to write the worth of 0 on worthless burns. Empty = the row says to set it to 0 yourself.",
+  "burn_zero_value_currency": "GBP",
+  "_burn_addresses_comment": "Addresses that destroy whatever is sent to them. NFTs destroyed by their contract (sent to nobody) count too.",
+  "burn_addresses": [
+    "tz1burnburnburnburnburnburnburjAYjjX",
+    "tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU"
+  ],
+  "_shared_nft_contracts_comment": "Contracts shared by many artists (hic et nunc, fxhash, Versum). A new NFT from one of these says nothing about a burn, so they're never used to pair one.",
+  "shared_nft_contracts": [
+    "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
+    "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE",
+    "KT1U6EHmNxJTkvaWJ4ThczG4FSDaHC21ssvi",
+    "KT1EfsNuqwLAWDd3o4pvfUx1CAh5GMdTrRvr",
+    "KT1LjmAdYQCLBjwv4S2oFkEzyHVkomAf5MrW"
+  ],
+  "_airdrop_senders_comment": "NFTs sent straight from these addresses are booked as airdrops worth 0 (label 'airdrop'; with burn_zero_value_currency or airdrop_zero_value_currency set, the worth is written as 0). Only when you paid nothing in that transaction and nothing else already explained it (an accepted offer, a direct swap). Tokens and other senders are left alone. Empty = off.",
+  "airdrop_senders": [],
+  "_wtz_mode_comment": "How WTZ (staked tez, worth a bit more than 1 XTZ and growing) is booked. 'non_event': wrapping isn't a trade; XTZ you get back above what you wrapped is staking income. 'trade': every wrap/unwrap is a small XTZ<->WTZ trade. 'review': list them for you to decide. 'one_to_one': old, inaccurate (WTZ = 1 XTZ). Leave it out to follow the mode (automatic = non_event, hands_on = review).",
+  "wtz_mode": "non_event",
+  "wtz_swap_contracts": [
+    "KT1LLZ5aFCwryDZs5vTEaYvKe37pmHLEXbiW",
+    "KT1Pyd1r9F4nMaHy8pPZxPSq6VCn9hVbVrf4"
+  ]
 }
